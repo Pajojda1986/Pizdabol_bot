@@ -4,12 +4,14 @@ import logging
 from aiogram import Bot, Dispatcher
 from aiogram.fsm.storage.memory import MemoryStorage
 
+from utils import del_data_play
 import config
 from handlers import router
 
+bot = Bot(token=config.BOT_TOKEN)
 
-async def main():
-    bot = Bot(token=config.BOT_TOKEN)
+
+async def start():
     dp = Dispatcher(storage=MemoryStorage())
     dp.include_router(router)
     await bot.delete_webhook(drop_pending_updates=True)
@@ -17,5 +19,6 @@ async def main():
 
 
 if __name__ == "__main__":
+    del_data_play()
     logging.basicConfig(level=logging.INFO)
-    asyncio.run(main())
+    asyncio.run(start())
