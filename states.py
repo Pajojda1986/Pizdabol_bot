@@ -8,3 +8,8 @@ class Lobby(StatesGroup):
 
 class Login(StatesGroup):
     login_lobby = State()
+    wait_start = State()
+
+
+class Game(StatesGroup):
+    game = State()

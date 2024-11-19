@@ -15,6 +15,9 @@ from main import bot
 @router.message(Command("start"))
 async def start_handler(msg: Message):
     await msg.answer(text.greet, reply_markup=kb.menu_kb)
+    for message in utils.exit_game(msg.from_user.id):
+        print(message)
+        await bot.send_message(*message)
 
 
 @router.message(F.text == "Меню")
@@ -47,7 +50,7 @@ async def input_text_prompt(clbck: CallbackQuery, state: FSMContext):
     await state.set_data({"game": game})
     game.create_json()
     player.create_json()
-    await clbck.message.edit_text(text.start_lobby.format(tok=game.game_info['token']), reply_markup=kb.iexit_kb)
+    await clbck.message.edit_text(text.start_lobby.format(tok=game.game_info['token']), reply_markup=kb.start_game_kb)
 
 
 @router.callback_query(F.data == "find_lobby")
@@ -57,11 +60,11 @@ async def menu(clbck: CallbackQuery, state: FSMContext):
     player.add_info(clbck.from_user.id, clbck.from_user.first_name, '')
     player.create_json()
 
-    await clbck.message.edit_text(text.login_lobby, reply_markup=kb.iexit_kb)
+    await clbck.message.edit_text(text.login_lobby, reply_markup=kb.exit_kb)
 
 
 @router.message(StateFilter(Login.login_lobby))
-async def find_lobby(msg: Message):
+async def find_lobby(msg: Message, state: FSMContext):
     data_lb = utils.find_lobby(msg.text, data=1)
     data_pl = utils.find_player(msg.from_user.id)
     if data_lb:
@@ -72,10 +75,26 @@ async def find_lobby(msg: Message):
         player = utils.Player(data_pl)
         player.add_game(f'game_{data_lb['token']}')
         player.create_json()
+        await state.set_state(Game.game)
     else:
         await msg.answer("Лобби не найдено")
 
 
 @router.callback_query(F.data == "statistics")
 async def statistic(clbck: CallbackQuery):
-    await clbck.message.edit_text(text.statistics, reply_markup=kb.iexit_kb)
+    await clbck.message.edit_text(text.statistics, reply_markup=kb.exit_kb)
+
+
+@router.callback_query(F.data == "start_game")
+async def start_game(clbck: CallbackQuery, state: FSMContext):
+    await state.set_state(Game.game)
+    for player_id in utils.get_all_id(clbck.from_user.id):
+        if player_id != clbck.from_user.id:
+            await bot.send_message(player_id, text.start_game.format(name=clbck.from_user.first_name))
+        else:
+            await clbck.message.edit_text(text.start_game.format(name="Ты"))
+
+    data_lb = utils.find_lobby(str(clbck.from_user.id), data=1)
+    game = utils.Game(data_lb)
+    game.dealing_cards()
+    game.create_json()

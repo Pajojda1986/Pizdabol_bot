@@ -6,3 +6,4 @@ login_lobby = 'Введите код приглашения для входа в
 statistics = 'Ваша статистика:'
 lobby_successfully = 'Вы успешно вошли в лобби игрока {name}'
 exit_player = 'Игрок {name} покинул лобби'
+start_game = "Игрок {name} начал игру!"

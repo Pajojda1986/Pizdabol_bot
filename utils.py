@@ -1,8 +1,9 @@
 from PIL import Image
-from random import randint
+from random import randint, shuffle
 import json
 from os import listdir, remove
 from text import exit_player
+from numpy import array_split
 
 
 async def cards():
@@ -25,6 +26,17 @@ def register_token():
     return token
 
 
+def shuffle_cards() -> list:
+    cards_list = []
+    all_games = listdir('cards')
+    for suit in all_games:
+        all_cards_of_suit = listdir('cards/' + suit)
+        for card in all_cards_of_suit:
+            cards_list.append(card[:-4])
+    shuffle(cards_list)
+    return cards_list
+
+
 class Game:
     def __init__(self, data=None):
         if data is None:
@@ -45,6 +57,16 @@ class Game:
             "id": player_id,
             "cards": []
         }
+
+    def dealing_cards(self):
+        all_cards = shuffle_cards()
+        print(all_cards)
+        print(self.game_info['players'])
+        count_of_players = len(self.game_info['players'])
+        print(count_of_players)
+        chunks = array_split(all_cards, count_of_players)
+        for player, id_player in zip(self.game_info['players'], range(count_of_players + 1)):
+            self.game_info['players'][player]['cards'] = chunks[id_player].tolist()
 
     def create_json(self):
         with open(f'games/game_{self.game_info['token']}.json', 'w', encoding='utf-8') as file:
@@ -98,7 +120,19 @@ def find_lobby(lb_id: str, data=None, raw=None):
                     return json.load(file)
                 elif raw:
                     return file
-
+    all_players = listdir('players')
+    for player in all_players:
+        print(player, f'player_{lb_id}.json')
+        if f'player_{lb_id}.json' == player:
+            with open(f'players/player_{lb_id}.json', 'r', encoding='utf-8') as file:
+                player_data = json.load(file)
+                for lobby_id in all_lobbies:
+                    if f'{player_data['in_game']}.json' == lobby_id:
+                        with open(f'games/{player_data['in_game']}.json', 'r', encoding='utf-8') as file_g:
+                            if data:
+                                return json.load(file_g)
+                            elif raw:
+                                return file
     return None
 
 
@@ -157,3 +191,14 @@ def exit_game(player_id: int):
                                 file_game.close()
                                 remove(f'games/{game}')
     return leave_message
+
+
+def get_all_id(player_id: int) -> list:
+    players_id = []
+    with open(f'players/player_{player_id}.json', 'r', encoding='utf-8') as file:
+        player_game = json.load(file)
+        with open(f'games/{player_game['in_game']}.json', 'r', encoding='utf-8') as file_g:
+            data = json.load(file_g)
+            for player_e in data['players']:
+                players_id.append(data['players'][player_e]['id'])
+    return players_id
