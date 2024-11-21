@@ -46,7 +46,7 @@ async def input_text_prompt(clbck: CallbackQuery, state: FSMContext):
     game = utils.Game()
     game.add_member(clbck.from_user.first_name, clbck.from_user.id)
     player = utils.Player()
-    player.add_info(clbck.from_user.id, clbck.from_user.first_name, f'game_{game.game_info['token']}')
+    player.add_info(clbck.from_user.id, clbck.from_user.first_name, f'game_{game.game_info["token"]}')
     await state.set_data({"game": game})
     game.create_json()
     player.create_json()
@@ -73,7 +73,7 @@ async def find_lobby(msg: Message, state: FSMContext):
         game.add_member(msg.from_user.first_name, msg.from_user.id)
         game.create_json()
         player = utils.Player(data_pl)
-        player.add_game(f'game_{data_lb['token']}')
+        player.add_game(f'game_{data_lb["token"]}')
         player.create_json()
         await state.set_state(Game.game)
     else:
