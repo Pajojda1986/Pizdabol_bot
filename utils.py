@@ -69,7 +69,7 @@ class Game:
             self.game_info['players'][player]['cards'] = chunks[id_player].tolist()
 
     def create_json(self):
-        with open(f'games/game_{self.game_info['token']}.json', 'w', encoding='utf-8') as file:
+        with open(f'games/game_{self.game_info["token"]}.json', 'w', encoding='utf-8') as file:
             json.dump(self.game_info, file, ensure_ascii=False, indent=4)
 
         print(self.game_info)
@@ -106,7 +106,7 @@ class Player:
         self.player_info['in_game'] = in_game
 
     def create_json(self):
-        with open(f'players/player_{self.player_info['id']}.json', 'w', encoding='utf-8') as file:
+        with open(f'players/player_{self.player_info["id"]}.json', 'w', encoding='utf-8') as file:
             json.dump(self.player_info, file, ensure_ascii=False, indent=4)
         print(self.player_info)
 
@@ -127,8 +127,8 @@ def find_lobby(lb_id: str, data=None, raw=None):
             with open(f'players/player_{lb_id}.json', 'r', encoding='utf-8') as file:
                 player_data = json.load(file)
                 for lobby_id in all_lobbies:
-                    if f'{player_data['in_game']}.json' == lobby_id:
-                        with open(f'games/{player_data['in_game']}.json', 'r', encoding='utf-8') as file_g:
+                    if f'{player_data["in_game"]}.json' == lobby_id:
+                        with open(f'games/{player_data["in_game"]}.json', 'r', encoding='utf-8') as file_g:
                             if data:
                                 return json.load(file_g)
                             elif raw:
@@ -197,7 +197,7 @@ def get_all_id(player_id: int) -> list:
     players_id = []
     with open(f'players/player_{player_id}.json', 'r', encoding='utf-8') as file:
         player_game = json.load(file)
-        with open(f'games/{player_game['in_game']}.json', 'r', encoding='utf-8') as file_g:
+        with open(f'games/{player_game["in_game"]}.json', 'r', encoding='utf-8') as file_g:
             data = json.load(file_g)
             for player_e in data['players']:
                 players_id.append(data['players'][player_e]['id'])
